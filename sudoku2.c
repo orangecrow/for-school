@@ -188,7 +188,7 @@ int sudoku_solve(){
 		for(j=1;j<10;j++)
 			printf("inc[%d]->valid=%d\n",i,inc[i]->valid);
 	}*/
-	bool try(int x){
+	int try(int x){
 		int i;
 		printf("inception level:%d\n",x);
 		if(!ulticheck()){
