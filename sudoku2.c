@@ -172,8 +172,10 @@ int can_be_done(){
 	}
 	return 1;
 }
+int total_tries;
 int sudoku_solve(){
 	int i,j,a;
+	total_tries=0;
 	for(a=0,j=0;j<M;j++){
 		for(i=0;i<N;i++)
 			if(tab[j][i].value==0)a++;
@@ -189,6 +191,7 @@ int sudoku_solve(){
 			printf("inc[%d]->valid=%d\n",i,inc[i]->valid);
 	}*/
 	int try(int x){
+		total_tries++;
 		int i;
 		printf("inception level:%d\n",x);
 		if(!ulticheck()){
@@ -204,7 +207,7 @@ int sudoku_solve(){
 				if(try(x+1)) return 1;
 				system("clear");
 				sudoku_display(tab);
-				usleep(50000);
+				usleep(500);
 			}			
 		}
 		printf("runed out of the loop in inc:%d\n",x);
@@ -213,7 +216,74 @@ int sudoku_solve(){
 	}
 	return try(0);
 }
+int sudoku_qsolve(){
+	int i,j,a;
+	total_tries=0;
+	for(a=0,j=0;j<M;j++){
+		for(i=0;i<N;i++)
+			if(tab[j][i].value==0)a++;
+	}
+	pole **inc=malloc(a*sizeof(pole*));
+	for(a=0,j=0;j<M;j++){
+		for(i=0;i<N;i++)
+			if(tab[j][i].value==0)inc[a++]=&tab[j][i];
+	}
+	//printf("a=%d\n",a);
+	
+	int count(pole* lolxd){
+		int i,a;
+		a=0;
+		for(i=1;i<10;i++){
+			if(lolxd->possibility[i]) a++;
+		}
+		return a;
+	}
+	int cmpfunc(const void *a,const void *b){
+		pole *x=*(const pole**)a;
+		pole *y=*(const pole**)b;
+		return (count(x)-count(y));
+	}
+	for(i=0;i<a;i++){
+		printf("inc[%d] count:%d\n",i,count(inc[i]));
+	}
 
+	qsort(inc,a,sizeof(pole*),cmpfunc);
+
+	for(i=0;i<a;i++){
+		printf("inc[%d] count:%d\n",i,count(inc[i]));
+	}
+	int fkoaensfd;
+	//scanf("%d",&fkoaensfd);
+	/*for(i=0;i<a;i++){
+		for(j=1;j<10;j++)
+			printf("inc[%d]->valid=%d\n",i,inc[i]->valid);
+	}*/
+	int try(int x){
+		int i;
+		total_tries++;
+		printf("inception level:%d\n",x);
+		if(!ulticheck()){
+			printf("ulticheck failed\n");
+			//inc[x-1]->value=0; not nessessery?
+			return 0;
+		}
+		if(x==a){printf("last iteration\n"); return 1;}
+		for(i=1;i<10;i++){
+			if(inc[x]->possibility[i]==1){
+				inc[x]->value=i;
+				printf("inc:%d  value:%d\n",x,i);
+				if(try(x+1)) return 1;
+				system("clear");
+				sudoku_display(tab);
+				usleep(5000);
+			}			
+		}
+		printf("runed out of the loop in inc:%d\n",x);
+		inc[x]->value=0;
+		return 0;
+	}
+	return try(0);
+}
 
 	/*for(i=0,j=0;j<M;j++){
 		swap[j]=NULL;									//clearing swap
@@ -227,16 +297,16 @@ int sudoku_solve(){
 
 int main(){
 	load();
-
 	//sudoku_display(tab);
 
 	if(ulticheck2())printf("it is solved sudoku\n");
 	else printf("it is not solved sudoku\n");
 	if(can_be_done())printf("it (maybe) can be done\n");
 	else printf("it can not be done\n");
-
-	if(sudoku_solve())printf("nailed it\n");
+	sleep(2);
+	if(sudoku_qsolve())printf("nailed it using %d tries\n",total_tries);
 	else printf("didin't work\n");
 	//sudoku_display(tab);
+
 	return 0;
 }
